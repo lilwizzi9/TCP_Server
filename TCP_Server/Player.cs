@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace TCP_Server
 {
@@ -16,6 +17,7 @@ namespace TCP_Server
         private string location = "(X=-69.939301,Y=-1628.697021,Z=457.307983)";
         private string last_location;
         private string control_rot;
+        private string input ="0.0,0.0";
 
         // Data
         private string id;
@@ -40,6 +42,8 @@ namespace TCP_Server
             while (!updated)
             {
                 if (msg($"|SUID:{this.id}")) {
+                    Thread.Sleep(500);
+                    msg($"{this.id}:Rep_loc:{location}");
                     updated = true;
                 }
 
@@ -75,7 +79,7 @@ namespace TCP_Server
                 // Send the message to the connected Player. 
                 stream.Write(data, 0, data.Length);
             } catch (Exception e) {
-                Console.WriteLine($"Error: {e}");
+                Console.WriteLine($"Error: {e}||");
                 return false;
             }
             return true;
@@ -99,19 +103,46 @@ namespace TCP_Server
 
         }
 
+        public void multicast(String s, bool self = true) {
+            foreach (Player p in players) {
+                if (self)
+                {
+                    p.msg(s);
+                }
+                else {
+                    if (p != this) {
+                        p.msg(s);
+                    }
+                }
+                
+            }
+        }
+
         public void rcv(string data ) {
                 string in_id = data.Split(":")[0];
                 string _event = data.Split(":")[1];
-                string msg = data.Split(":")[2];
+                string info = data.Split(":")[2];
             if (data.StartsWith(this.id)) {
                 // data for me
-                
+                location = info;
                 if (_event == "Rep_loc")
                 {
-                    location = msg;
                     foreach (Player p in players) {
-                        p.update_loc(this.id);
+
+                        Console.WriteLine(info);
+                        p.msg($"{this.id}:Rep_loc:{location}");
+
                     }
+
+                } else if (_event == "input") {
+                   Console.WriteLine("axis" + info);
+                   // movment prediction based on input
+                    input = info;
+                    multicast($"{this.id}:input:{info}",false);
+                } else if(_event == "rot") { 
+                    // Character Control Rotation
+                    Console.WriteLine("Rot" + info);
+                    multicast($"{this.id}:rot:{info}");
 
                 }
 

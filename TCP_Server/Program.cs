@@ -62,8 +62,8 @@ namespace TCP_Server
                 }
                 else
                 {
-                    Console.Clear();
-                    Console.WriteLine("Waiting For Connection...");
+                    //Console.Clear();
+                    //Console.WriteLine("Waiting For Connection...");
                 }
                 Thread.Sleep(3000);
 
@@ -82,7 +82,7 @@ namespace TCP_Server
             //Console.Clear();
            // Console.WriteLine("Elapsed: " + sw.Elapsed);
             //sw.Restart();
-            Console.WriteLine($"{e.TcpClient.Client.RemoteEndPoint}: {msg}");
+            //Console.WriteLine($"{e.TcpClient.Client.RemoteEndPoint}: {msg}");
             foreach (Player p in players) {
                 p.rcv(msg);
             }
